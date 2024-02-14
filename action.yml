@@ -1,0 +1,14 @@
+name: 'IcePAK'
+description: 'Pushes built image to polar server'
+inputs: 
+  polar_endpoint:
+    description: "The endpoint for polar image server."
+    required: true
+    default: "https://images.opsmaru.com"
+runs:
+  using: "composite"
+  steps:
+    - uses: erlef/setup-beam@v1
+      with:
+        otp-version: "26.2.1"
+        elixir-version: "1.15.7"
