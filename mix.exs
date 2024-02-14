@@ -6,8 +6,14 @@ defmodule Icepak.MixProject do
       app: :icepak,
       version: "0.1.0",
       elixir: "~> 1.14",
+      elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
-      deps: deps()
+      deps: deps(),
+      package: package(),
+      dialyzer: dialyzer(),
+      escript: [
+        main_module: Pakman.CLI
+      ]
     ]
   end
 
@@ -19,14 +25,36 @@ defmodule Icepak.MixProject do
     ]
   end
 
+  defp dialyzer do
+    [
+      plt_core_path: "priv/plts",
+      plt_file: {:no_warn, "priv/plts/dialyzer.plt"}
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support", "test/fixture"]
+  defp elixirc_paths(_), do: ["lib"]
+
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
       {:tesla, "~> 1.8.0"},
       {:finch, "~> 0.16.0"},
-      {:castore, "~> 1.0"}
+      {:castore, "~> 1.0"},
+      {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
       # {:dep_from_git, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
+    ]
+  end
+
+  def package do
+    [
+      description: "Image management tool for Polar",
+      files: ["lib", "config", "mix.exs", "README.md"],
+      maintainers: ["Zack Siri"],
+      licenses: ["MIT"],
+      links: %{github: "https://github.com/upmaru/icepak"}
     ]
   end
 end
