@@ -24,13 +24,14 @@ defmodule Icepak.Application do
     Supervisor.start_link(children, opts)
   end
 
-  defp finch_options(:test), do: [name: Icepak.Finch]
+  defp finch_options(env) when env in [:test, :dev], do: [name: Icepak.Finch]
 
   defp finch_options(_) do
     [
       name: Icepak.Finch,
       pools: %{
         default: [
+          size: 10,
           conn_opts: [
             transport_opts: [
               verify: :verify_peer,

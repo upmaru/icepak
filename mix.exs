@@ -38,8 +38,9 @@ defmodule Icepak.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:tesla, "~> 1.8.0"},
-      {:finch, "~> 0.16.0"},
+      {:req, "~> 0.4.0"},
+      {:finch, "~> 0.18.0"},
+      {:jason, "~> 1.0"},
       {:castore, "~> 1.0"},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}

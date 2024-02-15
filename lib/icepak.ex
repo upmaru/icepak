@@ -4,6 +4,6 @@ defmodule Icepak do
   """
 
   defdelegate push(options),
-    to: Icepak.Push
+    to: Icepak.Push,
     as: :perform
 end
