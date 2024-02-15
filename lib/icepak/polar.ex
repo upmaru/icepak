@@ -1,11 +1,21 @@
 defmodule Icepak.Polar do
   require Logger
 
-  def get_product(key) do
+  def get_product(client, key) do
     key = Base.url_encode64(key)
 
-    authenticate()
-    |> Req.get!(url: "/publish/products/#{key}")
+    Req.get!(client, url: "/publish/products/#{key}")
+  end
+
+  def create_version(client, product_id, version_params) do
+    Req.post!(client,
+      url: "/publish/products/#{product_id}/versions",
+      json: %{version: version_params}
+    )
+  end
+
+  def get_storage(client) do
+    Req.get!(client, url: "/publish/storage")
   end
 
   def authenticate do

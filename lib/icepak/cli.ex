@@ -15,6 +15,8 @@ defmodule Icepak.CLI do
     ]
   }
 
+  require Logger
+
   def main(args \\ []) do
     command = List.first(args)
     call = Map.get(@commands, command)
@@ -24,9 +26,13 @@ defmodule Icepak.CLI do
 
       {options, _, _} = OptionParser.parse(args, switches)
 
-      apply(Pakman, call, [options])
+      apply(Icepak, call, [options])
     else
-      raise "Unknown command: #{inspect(command)}"
+      IO.puts("""
+      Unknown command, please use one of the following:
+
+      - push - will push the built image
+      """)
     end
   end
 end

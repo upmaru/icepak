@@ -12,7 +12,7 @@ defmodule Icepak.MixProject do
       package: package(),
       dialyzer: dialyzer(),
       escript: [
-        main_module: Pakman.CLI
+        main_module: Icepak.CLI
       ]
     ]
   end
@@ -42,6 +42,7 @@ defmodule Icepak.MixProject do
       {:finch, "~> 0.18.0"},
       {:jason, "~> 1.0"},
       {:castore, "~> 1.0"},
+      {:aws, "~> 0.13.0"},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
