@@ -15,27 +15,36 @@ defmodule Icepak.Push do
     hash_ref = :crypto.hash_init(:sha256)
     full_path = Path.join(base_path, file)
     %{size: size} = File.stat!(full_path)
-    hash = calculate_hash(hash_ref, full_path)
+
+    hash =
+      full_path
+      |> calculate_hash(hash_ref)
+      |> finalize_hash()
 
     combined_hashes =
       Enum.map(@combinations, fn {key, values} ->
-        values = Enum.map(values, fn f -> Path.join(base_path, f) end)
+        files = Enum.map(values, fn f -> Path.join(base_path, f) end)
 
         %{
           name: key,
-          hash: calculate_hash(hash_ref, values)
+          hash:
+            files
+            |> Enum.reduce(hash_ref, &calculate_hash/2)
+            |> finalize_hash()
         }
       end)
 
     [
       %{
         name: file,
+        file_type: "incus.tar.xz",
         size: size,
         hash: hash,
         combined_hashes: combined_hashes
       },
       %{
         name: "lxd.tar.xz",
+        file_type: "lxd.tar.xz",
         size: size,
         hash: hash,
         combined_hashes: combined_hashes
@@ -47,37 +56,32 @@ defmodule Icepak.Push do
     hash_ref = :crypto.hash_init(:sha256)
     full_path = Path.join(base_path, file)
     %{size: size} = File.stat!(full_path)
-    hash = calculate_hash(hash_ref, Path.join(base_path, file))
+
+    hash =
+      full_path
+      |> calculate_hash(hash_ref)
+      |> finalize_hash()
 
     [
       %{
-        name: file,
+        name: "root.squashfs",
+        file_type: "squashfs",
         size: size,
         hash: hash
       }
     ]
   end
 
-  defp calculate_hash(hash_ref, files) when is_list(files) do
-    files
-    |> Enum.reduce(hash_ref, fn file, prev_ref ->
-      file
-      |> File.stream!([], 2048)
-      |> Enum.reduce(prev_ref, fn chunk, ref ->
-        :crypto.hash_update(ref, chunk)
-      end)
-    end)
-    |> :crypto.hash_final()
-    |> Base.encode16()
-    |> String.downcase()
-  end
-
-  defp calculate_hash(hash_ref, file) when is_binary(file) do
+  defp calculate_hash(file, hash_ref) do
     file
     |> File.stream!([], 2048)
     |> Enum.reduce(hash_ref, fn chunk, prev_ref ->
       :crypto.hash_update(prev_ref, chunk)
     end)
+  end
+
+  defp finalize_hash(hash) do
+    hash
     |> :crypto.hash_final()
     |> Base.encode16()
     |> String.downcase()
