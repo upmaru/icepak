@@ -11,7 +11,7 @@ defmodule Icepak.Upload do
         not is_nil(item.source)
       end)
 
-    polar_client = Polar.authenticate()
+    polar_client = Keyword.fetch!(options, :polar_client)
 
     %{
       status: 200,
@@ -48,7 +48,7 @@ defmodule Icepak.Upload do
       Logger.error("[Upload] Some uploads failed")
     end
 
-    uploaded
+    items
   end
 
   @chunk_size 5_242_880

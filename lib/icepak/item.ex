@@ -1,4 +1,6 @@
 defmodule Icepak.Item do
+  @derive Jason.Encoder
+
   defstruct name: "",
             file_type: "",
             size: 0,
