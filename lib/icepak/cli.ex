@@ -7,6 +7,7 @@ defmodule Icepak.CLI do
     push: [
       switches: [
         path: :string,
+        serial: :string,
         os: :string,
         arch: :string,
         release: :string,

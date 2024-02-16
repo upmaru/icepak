@@ -34,7 +34,7 @@ defmodule Icepak.Polar do
     |> Req.post()
     |> case do
       {:ok, %{body: %{"data" => %{"token" => session_token}}}} ->
-        Logger.info("Authenticated with Polar")
+        Logger.info("[Polar] Authenticated")
 
         Req.update(client, headers: [{"authorization", session_token}])
 
