@@ -59,7 +59,9 @@ defmodule Icepak.Upload do
        "InitiateMultipartUploadResult" => %{
          "UploadId" => upload_id
        }
-     }, _} = AWS.S3.create_multipart_upload(client, bucket, item.path, %{})
+     },
+     _} =
+      AWS.S3.create_multipart_upload(client, bucket, item.path, %{"ACL" => "public-read"})
 
     parts =
       item.source

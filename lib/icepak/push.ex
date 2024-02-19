@@ -6,7 +6,9 @@ defmodule Icepak.Push do
   @architecture_mappings %{
     "alpine" => %{
       "x86_64" => "amd64",
-      "aarch64" => "arm64"
+      "aarch64" => "arm64",
+      "arm64" => "arm64",
+      "amd64" => "amd64"
     }
   }
 
