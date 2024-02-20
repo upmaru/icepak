@@ -9,6 +9,10 @@ inputs:
     description: |
       Alpine linux version to use (edge | v3.19 | v3.18 | v3.17 | v3.16)
     required: true
+  arch:
+    description: |
+      Alpine linux version to use (x86_64 | aarch64)
+    required: true
 runs:
   using: "composite"
   steps:
@@ -21,6 +25,7 @@ runs:
       uses: jirutka/setup-alpine@v1
       with:
         branch: ${{ inputs.alpine }}
+        arch: ${{ inputs.arch }}
         packages: |
           zip
           tar
