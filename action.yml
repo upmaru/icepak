@@ -22,7 +22,7 @@ runs:
       shell: bash
 
     - name: Setup Alpine
-      uses: jirutka/setup-alpine@v1
+      uses: upmaru/setup-alpine@develop
       with:
         branch: ${{ inputs.alpine }}
         arch: ${{ inputs.arch }}
