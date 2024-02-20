@@ -12,10 +12,25 @@ runs:
         mkdir -p ~/.mix
       shell: bash
 
-    - uses: erlef/setup-beam@v1
+    - name: Setup Alpine
+      uses: jirutka/setup-alpine@v1
       with:
-        otp-version: "26"
-        elixir-version: "1.15.7"
+        branch: ${{ inputs.alpine }}
+        packages: |
+          zip
+          tar
+          sudo
+          cmake
+          elixir
+          coreutils
+          alpine-sdk
+        volumes: |
+          /home/runner/.mix:/home/runner/.mix
+
+    - name: Prepare Path
+      run: |
+        echo "/home/runner/.mix/escripts" >> $GITHUB_PATH
+      shell: alpine.sh {0}
 
     - name: Cache IcePAK
       id: cache-pakman
