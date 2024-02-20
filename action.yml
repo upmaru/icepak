@@ -14,7 +14,7 @@ runs:
 
     - uses: erlef/setup-beam@v1
       with:
-        otp-version: "26.2.1"
+        otp-version: "26"
         elixir-version: "1.15.7"
 
     - name: Cache IcePAK
