@@ -4,6 +4,11 @@ author: Zack Siri
 branding:
   color: blue
   icon: terminal
+inputs:
+  alpine:
+    description: |
+      Alpine linux version to use (edge | v3.19 | v3.18 | v3.17 | v3.16)
+    required: true
 runs:
   using: "composite"
   steps:
