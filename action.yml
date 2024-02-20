@@ -1,10 +1,9 @@
 name: 'IcePAK'
 description: 'Pushes built image to polar server'
-inputs: 
-  polar_endpoint:
-    description: "The endpoint for polar image server."
-    required: true
-    default: "https://images.opsmaru.com"
+author: Zack Siri
+branding:
+  color: blue
+  icon: terminal
 runs:
   using: "composite"
   steps:
