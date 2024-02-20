@@ -1,18 +1,17 @@
 # Icepak
 
-**TODO: Add description**
+Icepak github action will do the following:
+
+- Process metdata for all the built items
+- Interact with [polar](https://github.com/upmaru/polar) and publish images
 
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
 by adding `icepak` to your list of dependencies in `mix.exs`:
 
-```elixir
-def deps do
-  [
-    {:icepak, "~> 0.1.0"}
-  ]
-end
+```shell
+mix escript.install hex icepak
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)

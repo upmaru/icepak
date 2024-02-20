@@ -3,16 +3,7 @@ defmodule Icepak do
   Documentation for `Icepak`.
   """
 
-  @doc """
-  Hello world.
-
-  ## Examples
-
-      iex> Icepak.hello()
-      :world
-
-  """
-  def hello do
-    :world
-  end
+  defdelegate push(options),
+    to: Icepak.Push,
+    as: :perform
 end
