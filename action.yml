@@ -19,12 +19,13 @@ runs:
     - name: Create Mix Directory
       run: |
         mkdir -p ~/.mix
+        mkdir -p ~/go
       shell: bash
 
     - uses: actions/setup-go@v5
       with:
         go-version: '>=1.21.0'
-        cache-dependency-path: ~/go/src/github.com/lxc/**/*.sum
+        cache-dependency-path: ~/go/**/*.sum
 
     - name: Setup Distrobuilder
       run: |
