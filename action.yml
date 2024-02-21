@@ -19,23 +19,33 @@ runs:
     - name: Initial Setup
       run: |
         mkdir -p ~/.mix
-
-        sudo apt update
-        sudo apt install -y debootstrap rsync gpg squashfs-tools git make
-        mkdir -p ~/go/src/github.com/lxc/
-        cd ~/go/src/github.com/lxc/
-        git clone --depth 1 --branch distrobuilder-3.0 https://github.com/lxc/distrobuilder
       shell: bash
 
     - uses: actions/setup-go@v5
       with:
         go-version: '>=1.21.0'
         cache-dependency-path: |
-          /home/runner/go/src/github.com/lxc/distrobuilder/go.sum
+          /home/runner/go/src/**/*.sum
+
+    - name: Cache IcePAK
+      id: cache-icepak-distrobuilder
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.mix
+          ~/go
+        key: ${{ runner.arch }}-icepak-0.1.0-distrobuilder-3.0
 
     - name: Setup Distrobuilder
+      if: steps.cache-icepak-distrobuilder.outputs.cache-hit != 'true'
       run: |
-        cd ~/go/src/github.com/lxc/distrobuilder
+        sudo apt update
+        sudo apt install -y debootstrap rsync gpg squashfs-tools git make
+        mkdir -p ~/go/src/github.com/lxc/
+        cd ~/go/src/github.com/lxc/
+        git clone --depth 1 --branch distrobuilder-3.0 https://github.com/lxc/distrobuilder
+
+        cd ./distrobuilder
         make
       shell: bash
 
@@ -43,13 +53,6 @@ runs:
       run: |
         echo "/home/runner/go/bin" >> $GITHUB_PATH
       shell: bash
-
-    - name: Cache Distrobuilder
-      id: cache-distrobuilder
-      uses: actions/cache@v4
-      with:
-        path: ~/go/bin
-        key: ${{ runner.arch }}-distrobuilder-3.0
 
     - name: Setup Alpine
       uses: upmaru/setup-alpine@develop
@@ -71,13 +74,6 @@ runs:
       run: |
         echo "/home/runner/.mix/escripts" >> $GITHUB_PATH
       shell: alpine.sh {0}
-
-    - name: Cache IcePAK
-      id: cache-pakman
-      uses: actions/cache@v4
-      with:
-        path: ~/.mix
-        key: ${{ runner.arch }}-icepak-0.1.0
 
     - name: Install Pakman
       if: steps.cache-pakman.outputs.cache-hit != 'true'
