@@ -4,32 +4,92 @@ author: Zack Siri
 branding:
   color: blue
   icon: terminal
+inputs:
+  alpine:
+    description: |
+      Alpine linux version to use (edge | v3.19 | v3.18 | v3.17 | v3.16)
+    required: true
+  arch:
+    description: |
+      Alpine linux version to use (x86_64 | aarch64)
+    required: true
 runs:
   using: "composite"
   steps:
-    - name: Create Mix Directory
+    - name: Initial Setup
       run: |
         mkdir -p ~/.mix
+        mkdir -p ~/go
+
+        sudo apt-get update
+        sudo apt-get install -y debootstrap rsync gpg squashfs-tools
       shell: bash
 
-    - uses: erlef/setup-beam@v1
+    - name: Cache Distrobuilder
+      id: cache-distrobuilder
+      uses: actions/cache@v4
       with:
-        otp-version: "26.2.1"
-        elixir-version: "1.15.7"
+        path: ~/go/bin
+        key: ${{ runner.arch }}-distrobuilder-3.0
+
+    - uses: actions/setup-go@v5
+      if: steps.cache-distrobuilder.outputs.cache-hit != 'true'
+      with:
+        go-version: '>=1.21.0'
+        cache: false
+
+    - name: Setup Distrobuilder
+      if: steps.cache-distrobuilder.outputs.cache-hit != 'true'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y git make
+        mkdir -p ~/go/src/github.com/lxc/
+        cd ~/go/src/github.com/lxc/
+        git clone --depth 1 --branch distrobuilder-3.0 https://github.com/lxc/distrobuilder
+
+        cd ./distrobuilder
+        make
+      shell: bash
+
+    - name: Prepare Distrobuilder Path
+      run: |
+        echo "/home/runner/go/bin" >> $GITHUB_PATH
+      shell: bash
+
+    - name: Setup Alpine
+      uses: upmaru/setup-alpine@develop
+      with:
+        branch: ${{ inputs.alpine }}
+        arch: ${{ inputs.arch }}
+        packages: |
+          zip
+          tar
+          sudo
+          cmake
+          elixir
+          coreutils
+          alpine-sdk
+        volumes: |
+          /home/runner/.mix:/home/runner/.mix
+
+    - name: Prepare IcePAK Path
+      run: |
+        echo "/home/runner/.mix/escripts" >> $GITHUB_PATH
+      shell: alpine.sh {0}
 
     - name: Cache IcePAK
-      id: cache-pakman
+      id: cache-icepak
       uses: actions/cache@v4
       with:
         path: ~/.mix
-        key: ${{ runner.arch }}-icepak-0.1.0
+        key: ${{ runner.arch }}-icepak-0.1.1
 
     - name: Install Pakman
-      if: steps.cache-pakman.outputs.cache-hit != 'true'
+      if: steps.cache-icepak.outputs.cache-hit != 'true'
       run: |
         mix local.rebar --force
         mix local.hex --force
-        mix escript.install hex icepak 0.1.0 --force
-      shell: bash
+        mix escript.install hex icepak 0.1.1 --force
+      shell: alpine.sh {0}
       env:
         MIX_ENV: prod

@@ -53,10 +53,14 @@ defmodule Icepak.Push do
       Logger.info("[Push] Sucessfully pushed version #{serial} for #{key}")
     else
       %{status: 404} ->
-        Logger.error("[Push] Product not found")
+        Logger.error("[Push] Product not found.")
+
+        raise "[Push] Product not found please create make sure the product with key #{product_key} exists on polar image server."
 
       _ ->
-        Logger.error("[Push] Some unknown error occurred")
+        Logger.error("[Push] Some unknown error occurred.")
+
+        raise "[Push] Some unknown error occurred."
     end
   end
 end
