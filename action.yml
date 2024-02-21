@@ -16,25 +16,26 @@ inputs:
 runs:
   using: "composite"
   steps:
-    - name: Create Mix Directory
+    - name: Initial Setup
       run: |
         mkdir -p ~/.mix
-        mkdir -p ~/go
+
+        sudo apt update
+        sudo apt install -y debootstrap rsync gpg squashfs-tools git make
+        mkdir -p ~/go/src/github.com/lxc/
+        cd ~/go/src/github.com/lxc/
+        git clone --depth 1 --branch distrobuilder-3.0 https://github.com/lxc/distrobuilder
       shell: bash
 
     - uses: actions/setup-go@v5
       with:
         go-version: '>=1.21.0'
-        cache-dependency-path: /home/runner/go/**/*.sum
+        cache-dependency-path: |
+          /home/runner/go/src/github.com/lxc/distrobuilder/go.sum
 
     - name: Setup Distrobuilder
       run: |
-        sudo apt update
-        sudo apt install -y debootstrap rsync gpg squashfs-tools git make
-        mkdir -p ~/go/src/github.com/lxc/
-        cd ~/go/src/github.com/lxc/
-        git clone https://github.com/lxc/distrobuilder
-        cd ./distrobuilder
+        cd ~/go/src/github.com/lxc/distrobuilder
         make
       shell: bash
 
@@ -48,7 +49,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/go
-        key: ${{ runner.arch }}-distrobuilder-0.1.0
+        key: ${{ runner.arch }}-distrobuilder-3.0
 
     - name: Setup Alpine
       uses: upmaru/setup-alpine@develop
