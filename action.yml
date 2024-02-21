@@ -20,16 +20,10 @@ runs:
       run: |
         mkdir -p ~/.mix
         mkdir -p ~/go
-        
+
         sudo apt-get update
         sudo apt-get install -y debootstrap rsync gpg squashfs-tools
       shell: bash
-
-    - uses: actions/setup-go@v5
-      with:
-        go-version: '>=1.21.0'
-        cache-dependency-path: |
-          /home/runner/go/src/**/*.sum
 
     - name: Cache Distrobuilder
       id: cache-distrobuilder
@@ -37,6 +31,12 @@ runs:
       with:
         path: ~/go/bin
         key: ${{ runner.arch }}-distrobuilder-3.0
+
+    - uses: actions/setup-go@v5
+      if: steps.cache-distrobuilder.outputs.cache-hit != 'true'
+      with:
+        go-version: '>=1.21.0'
+        cache: false
 
     - name: Setup Distrobuilder
       if: steps.cache-distrobuilder.outputs.cache-hit != 'true'
