@@ -55,6 +55,6 @@ runs:
         mix local.rebar --force
         mix local.hex --force
         mix escript.install hex icepak 0.1.0 --force
-      shell: bash
+      shell: alpine.sh {0}
       env:
         MIX_ENV: prod
