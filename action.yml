@@ -21,10 +21,14 @@ runs:
         mkdir -p ~/.mix
       shell: bash
 
+    - uses: actions/setup-go@v5
+      with:
+        go-version: '>=1.21.0'
+
     - name: Setup Distrobuilder
       run: |
         sudo apt update
-        sudo apt install -y golang-go debootstrap rsync gpg squashfs-tools git make
+        sudo apt install -y debootstrap rsync gpg squashfs-tools git make
         mkdir -p ~/go/src/github.com/lxc/
         cd ~/go/src/github.com/lxc/
         git clone https://github.com/lxc/distrobuilder
