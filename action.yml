@@ -48,7 +48,7 @@ runs:
       id: cache-distrobuilder
       uses: actions/cache@v4
       with:
-        path: ~/go
+        path: ~/go/bin
         key: ${{ runner.arch }}-distrobuilder-3.0
 
     - name: Setup Alpine
