@@ -38,7 +38,7 @@ runs:
       shell: bash
 
     - name: Cache Distrobuilder
-      id: cache-pakman
+      id: cache-distrobuilder
       uses: actions/cache@v4
       with:
         path: ~/go
