@@ -30,7 +30,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: ~/go/bin
-        key: ${{ runner.arch }}-distrobuilder-3.0
+        key: ${{ runner.arch }}-distrobuilder-main
 
     - uses: actions/setup-go@v5
       if: steps.cache-distrobuilder.outputs.cache-hit != 'true'
@@ -45,7 +45,7 @@ runs:
         sudo apt-get install -y git make
         mkdir -p ~/go/src/github.com/lxc/
         cd ~/go/src/github.com/lxc/
-        git clone --depth 1 --branch distrobuilder-3.0 https://github.com/lxc/distrobuilder
+        git clone --depth 1 --branch main https://github.com/lxc/distrobuilder
 
         cd ./distrobuilder
         make
