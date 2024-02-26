@@ -4,12 +4,10 @@ defmodule Icepak.Push do
   alias Icepak.Polar
 
   @architecture_mappings %{
-    "alpine" => %{
-      "x86_64" => "amd64",
-      "aarch64" => "arm64",
-      "arm64" => "arm64",
-      "amd64" => "amd64"
-    }
+    "x86_64" => "amd64",
+    "aarch64" => "arm64",
+    "arm64" => "arm64",
+    "amd64" => "amd64"
   }
 
   require Logger
@@ -23,8 +21,7 @@ defmodule Icepak.Push do
     variant = Keyword.fetch!(options, :variant)
     serial = Keyword.fetch!(options, :serial)
 
-    mapping = Map.fetch!(@architecture_mappings, String.downcase(os))
-    arch = Map.fetch!(mapping, arch)
+    arch = Map.fetch!(@architecture_mappings, arch)
 
     storage_path = Path.join(["images", os, release, arch, variant, serial])
 
