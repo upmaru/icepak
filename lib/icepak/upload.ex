@@ -66,11 +66,8 @@ defmodule Icepak.Upload do
     parts =
       item.source
       |> File.stream!([], @chunk_size)
-      |> Stream.chunk_every(@chunk_size)
       |> Stream.with_index(1)
       |> Enum.map(fn {chunk, i} ->
-        chunk = Enum.join(chunk)
-
         Logger.info("[Upload] Starting part #{i} of #{item.path}")
 
         {:ok, nil, %{headers: headers, status_code: 200}} =
