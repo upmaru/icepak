@@ -11,7 +11,13 @@ defmodule Icepak.Item do
             combined_hashes: []
 
   @combinations %{
-    "combined_squashfs_sha256" => ["incus.tar.xz", "rootfs.squashfs"]
+    "combined_squashfs_sha256" => ["incus.tar.xz", "rootfs.squashfs"],
+    "combined_disk-kvm-img_sha256" => ["incus.tar.xz", "disk.qcow2"]
+  }
+
+  @file_types %{
+    "rootfs.squashfs" => "squashfs",
+    "disk.qcow2" => "disk-kvm.img"
   }
 
   defmodule Hash do
@@ -84,7 +90,7 @@ defmodule Icepak.Item do
     ]
   end
 
-  def prepare("rootfs.squashfs" = file, %{base_path: base_path, storage_path: storage_path}) do
+  def prepare(file, %{base_path: base_path, storage_path: storage_path}) do
     hash_ref = :crypto.hash_init(:sha256)
     full_path = Path.join(base_path, file)
     %{size: size} = File.stat!(full_path)
@@ -96,10 +102,12 @@ defmodule Icepak.Item do
       |> calculate_hash(hash_ref)
       |> finalize_hash()
 
+    file_type = Map.fetch!(@file_types, file)
+
     [
       %__MODULE__{
-        name: "root.squashfs",
-        file_type: "squashfs",
+        name: file,
+        file_type: file_type,
         size: size,
         hash: hash,
         path: storage_path,
