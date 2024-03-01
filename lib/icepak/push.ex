@@ -13,7 +13,10 @@ defmodule Icepak.Push do
   require Logger
 
   def perform(options) do
-    base_path = Path.expand(Keyword.get(options, :path, "~/"))
+    base_path =
+      options
+      |> Keyword.get(:path, System.get_env("GITHUB_WORKSPACE"))
+      |> Path.expand()
 
     os = Keyword.fetch!(options, :os)
     arch = Keyword.fetch!(options, :arch)
