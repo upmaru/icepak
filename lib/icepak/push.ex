@@ -13,7 +13,7 @@ defmodule Icepak.Push do
   require Logger
 
   def perform(options) do
-    base_path = Path.expand(Keyword.fetch!(options, :path))
+    base_path = Path.expand(Keyword.get(options, :path, "~/"))
 
     os = Keyword.fetch!(options, :os)
     arch = Keyword.fetch!(options, :arch)
@@ -34,6 +34,9 @@ defmodule Icepak.Push do
 
     items =
       File.ls!(base_path)
+      |> Enum.filter(fn file_name ->
+        file_name in ["incus.tar.xz", "rootfs.squashfs", "disk.qcow2"]
+      end)
       |> Enum.flat_map(&Item.prepare(&1, item_params))
       |> Upload.perform(polar_client: polar_client)
 
