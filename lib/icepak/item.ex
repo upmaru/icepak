@@ -55,7 +55,11 @@ defmodule Icepak.Item do
       |> finalize_hash()
 
     combined_hashes =
-      Enum.map(@combinations, fn {key, values} ->
+      @combinations
+      |> Enum.filter(fn {_name, values} ->
+        Enum.all?(values, fn f -> File.exists?(Path.join(base_path, f)) end)
+      end)
+      |> Enum.map(fn {key, values} ->
         files = Enum.map(values, fn f -> Path.join(base_path, f) end)
 
         %{
