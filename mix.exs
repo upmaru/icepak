@@ -43,6 +43,7 @@ defmodule Icepak.MixProject do
       {:jason, "~> 1.0"},
       {:castore, "~> 1.0"},
       {:aws, "~> 0.13.0"},
+      {:lexdee, "~> 2.3"},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},

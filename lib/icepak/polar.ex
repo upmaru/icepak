@@ -22,8 +22,17 @@ defmodule Icepak.Polar do
     Req.get!(client, url: "/publish/testing/checks")
   end
 
-  def get_testing_clsuters(client) do
+  def get_testing_clusters(client) do
     Req.get!(client, url: "/publish/testing/clusters")
+    |> case do
+      %{status: 200, body: %{"data" => clusters}} ->
+        Enum.map(clusters, fn cluster ->
+          __MODULE__.Cluster.new(cluster)
+        end)
+
+      _ ->
+        raise "Failed to fetch testing clusters"
+    end
   end
 
   def authenticate do

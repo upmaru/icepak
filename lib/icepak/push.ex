@@ -3,13 +3,6 @@ defmodule Icepak.Push do
   alias Icepak.Upload
   alias Icepak.Polar
 
-  @architecture_mappings %{
-    "x86_64" => "amd64",
-    "aarch64" => "arm64",
-    "arm64" => "arm64",
-    "amd64" => "amd64"
-  }
-
   require Logger
 
   def perform(options) do
@@ -24,7 +17,7 @@ defmodule Icepak.Push do
     variant = Keyword.fetch!(options, :variant)
     serial = Keyword.fetch!(options, :serial)
 
-    arch = Map.fetch!(@architecture_mappings, arch)
+    arch = Map.fetch!(Icepak.architecture_mappings(), arch)
 
     storage_path = Path.join(["images", os, release, arch, variant, serial])
 
