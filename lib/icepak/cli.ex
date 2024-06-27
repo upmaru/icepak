@@ -1,6 +1,6 @@
 defmodule Icepak.CLI do
   @commands %{
-    "push" => :push
+    "push" => :push,
     "validate" => :validate
   }
 

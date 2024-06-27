@@ -44,6 +44,8 @@ defmodule Icepak.MixProject do
       {:castore, "~> 1.0"},
       {:aws, "~> 0.13.0"},
       {:lexdee, "~> 2.3"},
+      {:uniq, "~> 0.6"},
+      {:shortuuid, "~> 3.0"},
       {:dialyxir, "~> 1.4", only: [:dev], runtime: false},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
       # {:dep_from_hexpm, "~> 0.3.0"},
