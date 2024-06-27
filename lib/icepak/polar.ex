@@ -18,6 +18,14 @@ defmodule Icepak.Polar do
     Req.get!(client, url: "/publish/storage")
   end
 
+  def get_testing_checks(client) do
+    Req.get!(client, url: "/publish/testing/checks")
+  end
+
+  def get_testing_clsuters(client) do
+    Req.get!(client, url: "/publish/testing/clusters")
+  end
+
   def authenticate do
     auth_token = System.get_env("POLAR_AUTH_TOKEN")
 
