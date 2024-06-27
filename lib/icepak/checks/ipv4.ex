@@ -14,12 +14,13 @@ defmodule Icepak.Checks.IPv4 do
     Task.Supervisor.async_stream(
       Icepak.TaskSupervisor,
       metadata.combined_hashes,
+      __MODULE__,
       :handle_instance,
       [client, [arch: arch]]
     )
   end
 
-  defp handle_instance(hash_item, client, options) do
+  def handle_instance(hash_item, client, options) do
     arch = Keyword.fetch!(options, :arch)
 
     uuid =
