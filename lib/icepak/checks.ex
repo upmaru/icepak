@@ -7,6 +7,10 @@ defmodule Icepak.Checks do
     "ipv6" => Icepak.Checks.IPv6
   }
 
+  defmodule Assessment do
+    defstruct [:name, :result]
+  end
+
   def perform(options) do
     base_path =
       options

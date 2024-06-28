@@ -15,6 +15,11 @@ defmodule Icepak.Testing do
     "combined_disk-kvm-img_sha256" => "virtual-machine"
   }
 
+  # @architecture_mappings %{
+  #   "amd64" => "x86_64",
+  #   "arm64" => "aarch64"
+  # }
+
   def project, do: @project_params
 
   def image_server do
@@ -46,6 +51,13 @@ defmodule Icepak.Testing do
     |> case do
       {:ok, _} ->
         {:ok, @project_params["name"]}
+
+      {:error, %{"error" => error, "error_code" => 409}} = result ->
+        if error =~ "entry already exists" do
+          {:ok, @project_params["name"]}
+        else
+          result
+        end
 
       {:error, _} ->
         {:error, :could_not_get_or_create_project}
