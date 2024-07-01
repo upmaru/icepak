@@ -126,6 +126,11 @@ defmodule Icepak.ChecksTest do
         %{status: 201, body: %{"data" => %{"id" => 1, "name" => params.name}}}
       end)
 
+      Icepak.LexdeeMock
+      |> expect(:stop_instance, fn _client, _params, _options ->
+        {:ok, %{body: %{"id" => "some-uuid"}}}
+      end)
+
       assert results =
                Icepak.Checks.perform(
                  os: os,

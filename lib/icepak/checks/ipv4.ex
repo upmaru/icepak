@@ -88,11 +88,16 @@ defmodule Icepak.Checks.IPv4 do
       %{"addresses" => addresses} = Map.get(network, "eth0")
       inet = Enum.find(addresses, fn a -> a["family"] == "inet" end)
 
-      if not is_nil(inet) do
-        @polar.transition_testing_assessment(polar_client, assessment, %{name: "pass"})
-      else
-        @polar.transition_testing_assessment(polar_client, assessment, %{name: "fail"})
-      end
+      result =
+        if not is_nil(inet) do
+          @polar.transition_testing_assessment(polar_client, assessment, %{name: "pass"})
+        else
+          @polar.transition_testing_assessment(polar_client, assessment, %{name: "fail"})
+        end
+
+      @lexdee.stop_instance(client, instance_name, query: [project: project_name])
+
+      result
     end
   end
 end
