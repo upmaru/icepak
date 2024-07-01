@@ -12,7 +12,7 @@ defmodule Icepak.Testing do
 
   @instance_type_mappings %{
     "combined_squashfs_sha256" => "container",
-    "combined_disk-kvm-img_sha256" => "virtual-machine"
+    "combined_disk-kvm-img_sha256" => "vm"
   }
 
   @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
