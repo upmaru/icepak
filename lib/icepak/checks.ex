@@ -11,6 +11,8 @@ defmodule Icepak.Checks do
     defstruct [:name, :result]
   end
 
+  @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
+
   def perform(options) do
     base_path =
       options
@@ -45,11 +47,31 @@ defmodule Icepak.Checks do
       end)
       |> Enum.flat_map(&Item.prepare(&1, item_params))
 
+    product_key = Enum.join([os, release, arch, variant], ":")
+
+    %{status: 200, body: %{"data" => product}} = Polar.get_product(polar_client, product_key)
+    %{status: 200, body: %{"data" => version}} = Polar.get_version(polar_client, product, serial)
+
     clusters = Polar.get_testing_clusters(polar_client)
+    polar_checks = Polar.get_testing_checks(polar_client)
+
+    checks =
+      Enum.filter(checks, fn c ->
+        c in Enum.map(polar_checks, fn pc -> pc.name end)
+      end)
 
     items
     |> Enum.filter(fn i -> i.is_metadata end)
-    |> Enum.flat_map(&handle_metadata(&1, %{checks: checks, clusters: clusters}))
+    |> Enum.flat_map(
+      &handle_metadata(&1, %{
+        checks: checks,
+        polar_checks: polar_checks,
+        product: product,
+        version: version,
+        polar_client: polar_client,
+        clusters: clusters
+      })
+    )
   end
 
   defp handle_metadata(metadata, state) do
@@ -61,7 +83,17 @@ defmodule Icepak.Checks do
       end)
 
     if cluster do
-      Enum.flat_map(state.checks, &handle_check(&1, %{metadata: metadata, cluster: cluster}))
+      Enum.flat_map(
+        state.checks,
+        &handle_check(&1, %{
+          metadata: metadata,
+          polar_client: state.polar_client,
+          polar_checks: state.polar_checks,
+          product: state.product,
+          version: state.version,
+          cluster: cluster
+        })
+      )
     else
       raise "No cluster found for arch: #{state.arch} and type: #{type}"
     end
@@ -70,6 +102,11 @@ defmodule Icepak.Checks do
   defp handle_check(check, state) do
     module = Map.fetch!(@checks_mapping, check)
 
-    module.perform(state)
+    polar_check =
+      Enum.find(state.polar_checks, fn pc ->
+        pc.name == check
+      end)
+
+    module.perform(%{state | check: polar_check})
   end
 end

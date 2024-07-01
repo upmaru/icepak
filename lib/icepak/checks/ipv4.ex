@@ -4,7 +4,12 @@ defmodule Icepak.Checks.IPv4 do
 
   @check_name "ipv4"
 
-  def perform(%{cluster: cluster, metadata: metadata}) do
+  def perform(%{
+        cluster: cluster,
+        check: polar_check,
+        polar_client: polar_client,
+        metadata: metadata
+      }) do
     client =
       Lexdee.create_client(
         cluster.endpoint,
@@ -16,15 +21,24 @@ defmodule Icepak.Checks.IPv4 do
       Icepak.TaskSupervisor,
       metadata.combined_hashes,
       __MODULE__,
-      :handle_instance,
-      [client, [arch: cluster.arch]],
+      :handle_assessment,
+      [client, [cluster: cluster, check: polar_check, polar_client: polar_client]],
       timeout: 30_000
     )
     |> Enum.to_list()
   end
 
-  def handle_instance(hash_item, client, options) do
-    arch = Keyword.fetch!(options, :arch)
+  def handle_assessment(hash_item, client, options) do
+    cluster = Keyword.fetch!(options, :cluster)
+    polar_client = Keyword.fetch!(options, :polar_client)
+    version = Keywod.fetch!(options, :version)
+    check = Keyword.fetch!(options, :check)
+
+    %{status: 200, body: %{"data" => assessment}} =
+      Polar.get_or_create_assessment(polar_client, version, %{
+        check_id: check.id,
+        cluster_id: cluster.id
+      })
 
     {:ok, uuid} =
       Uniq.UUID.uuid7()
@@ -35,7 +49,7 @@ defmodule Icepak.Checks.IPv4 do
     instance_params =
       Testing.params(%{
         type: hash_item.name,
-        arch: arch,
+        arch: cluster.arch,
         name: instance_name,
         fingerprint: hash_item.hash
       })

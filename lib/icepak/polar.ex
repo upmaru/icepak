@@ -1,10 +1,18 @@
 defmodule Icepak.Polar do
   require Logger
 
+  @behaviour Icepak.Polar.Behaviour
+
   def get_product(client, key) do
     key = Base.url_encode64(key)
 
     Req.get!(client, url: "/publish/products/#{key}")
+  end
+
+  def get_version(client, product, serial) do
+    product_id = product["id"]
+
+    Req.get!(client, url: "/publish/products/#{product_id}/versions/#{serial}")
   end
 
   def create_version(client, product_id, version_params) do
@@ -20,6 +28,15 @@ defmodule Icepak.Polar do
 
   def get_testing_checks(client) do
     Req.get!(client, url: "/publish/testing/checks")
+    |> case do
+      %{status: 200, body: %{"data" => checks}} ->
+        Enum.map(checks, fn check ->
+          __MODULE__.Check.new(check)
+        end)
+
+      _ ->
+        raise "Failed to fetch testing checks"
+    end
   end
 
   def get_testing_clusters(client) do
@@ -33,6 +50,15 @@ defmodule Icepak.Polar do
       _ ->
         raise "Failed to fetch testing clusters"
     end
+  end
+
+  def get_or_create_testing_assessment(client, version, params) do
+    version_id = version["id"]
+
+    Req.post!(client,
+      url: "/publish/testing/versions/#{version_id}/assessments",
+      json: %{assessment: params}
+    )
   end
 
   def authenticate do
