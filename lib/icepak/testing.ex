@@ -15,6 +15,7 @@ defmodule Icepak.Testing do
     "combined_disk-kvm-img_sha256" => "virtual-machine"
   }
 
+  @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
   # @architecture_mappings %{
   #   "amd64" => "x86_64",
   #   "arm64" => "aarch64"
@@ -47,7 +48,7 @@ defmodule Icepak.Testing do
 
   def get_or_create_project(client) do
     client
-    |> Lexdee.create_project(@project_params)
+    |> @lexdee.create_project(@project_params)
     |> case do
       {:ok, _} ->
         {:ok, @project_params["name"]}

@@ -61,6 +61,15 @@ defmodule Icepak.Polar do
     )
   end
 
+  def transition_testing_assessment(client, assessment, params) do
+    assessment_id = assessment["id"]
+
+    Req.post!(client,
+      url: "/publish/testing/assessments/#{assessment_id}/events",
+      json: %{event: params}
+    )
+  end
+
   def authenticate do
     auth_token = System.get_env("POLAR_AUTH_TOKEN")
 

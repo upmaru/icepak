@@ -1,5 +1,5 @@
 defmodule Icepak.ItemTest do
-  use ExUnit.Case
+  use ExUnit.Case, async: true
 
   alias Icepak.Item
 

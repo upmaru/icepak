@@ -1,15 +1,44 @@
 defmodule Icepak.Checks.IPv4 do
   alias Icepak.Testing
-  alias Icepak.Checks.Assessment
 
   @check_name "ipv4"
+
+  @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
+  @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
+
+  @callback perform(map) :: map
 
   def perform(%{
         cluster: cluster,
         check: polar_check,
         polar_client: polar_client,
-        metadata: metadata
+        metadata: metadata,
+        version: version
       }) do
+    options = [
+      cluster: cluster,
+      version: version,
+      check: polar_check,
+      polar_client: polar_client
+    ]
+
+    Task.Supervisor.async_stream(
+      Icepak.TaskSupervisor,
+      metadata.combined_hashes,
+      __MODULE__,
+      :handle_assessment,
+      [options],
+      timeout: 30_000
+    )
+    |> Enum.to_list()
+  end
+
+  def handle_assessment(hash_item, options) do
+    cluster = Keyword.fetch!(options, :cluster)
+    polar_client = Keyword.fetch!(options, :polar_client)
+    version = Keyword.fetch!(options, :version)
+    check = Keyword.fetch!(options, :check)
+
     client =
       Lexdee.create_client(
         cluster.endpoint,
@@ -17,28 +46,14 @@ defmodule Icepak.Checks.IPv4 do
         cluster.private_key
       )
 
-    Task.Supervisor.async_stream(
-      Icepak.TaskSupervisor,
-      metadata.combined_hashes,
-      __MODULE__,
-      :handle_assessment,
-      [client, [cluster: cluster, check: polar_check, polar_client: polar_client]],
-      timeout: 30_000
-    )
-    |> Enum.to_list()
-  end
-
-  def handle_assessment(hash_item, client, options) do
-    cluster = Keyword.fetch!(options, :cluster)
-    polar_client = Keyword.fetch!(options, :polar_client)
-    version = Keywod.fetch!(options, :version)
-    check = Keyword.fetch!(options, :check)
-
     %{status: 200, body: %{"data" => assessment}} =
-      Polar.get_or_create_assessment(polar_client, version, %{
+      @polar.get_or_create_testing_assessment(polar_client, version, %{
         check_id: check.id,
         cluster_id: cluster.id
       })
+
+    %{status: 201, body: %{"data" => _event}} =
+      @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
 
     {:ok, uuid} =
       Uniq.UUID.uuid7()
@@ -56,17 +71,17 @@ defmodule Icepak.Checks.IPv4 do
 
     with {:ok, project_name} <- Testing.get_or_create_project(client),
          {:ok, %{body: create_operation}} <-
-           Lexdee.create_instance(client, instance_params, query: [project: project_name]),
+           @lexdee.create_instance(client, instance_params, query: [project: project_name]),
          {:ok, _wait_create_result} <-
-           Lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 120]),
+           @lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 120]),
          {:ok, %{body: start_operation}} <-
-           Lexdee.start_instance(client, instance_name, query: [project: project_name]),
+           @lexdee.start_instance(client, instance_name, query: [project: project_name]),
          {:ok, _wait_start_result} <-
-           Lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 120]) do
+           @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 120]) do
       :timer.sleep(2_000)
 
       {:ok, %{body: %{"network" => network}}} =
-        Lexdee.get_state(client, "/1.0/instances/#{instance_name}",
+        @lexdee.get_state(client, "/1.0/instances/#{instance_name}",
           query: [project: project_name]
         )
 
@@ -74,9 +89,9 @@ defmodule Icepak.Checks.IPv4 do
       inet = Enum.find(addresses, fn a -> a["family"] == "inet" end)
 
       if not is_nil(inet) do
-        %Assessment{name: @check_name, result: "pass"}
+        @polar.transition_testing_assessment(polar_client, assessment, %{name: "pass"})
       else
-        %Assessment{name: @check_name, result: "fail"}
+        @polar.transition_testing_assessment(polar_client, assessment, %{name: "fail"})
       end
     end
   end

@@ -1,15 +1,10 @@
 defmodule Icepak.Checks do
-  alias Icepak.Polar
   alias Icepak.Item
 
   @checks_mapping %{
     "ipv4" => Icepak.Checks.IPv4,
     "ipv6" => Icepak.Checks.IPv6
   }
-
-  defmodule Assessment do
-    defstruct [:name, :result]
-  end
 
   @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
@@ -33,7 +28,7 @@ defmodule Icepak.Checks do
 
     storage_path = Path.join(["images", os, release, arch, variant, serial])
 
-    polar_client = Polar.authenticate()
+    polar_client = @polar.authenticate()
 
     item_params = %{
       base_path: base_path,
@@ -49,11 +44,11 @@ defmodule Icepak.Checks do
 
     product_key = Enum.join([os, release, arch, variant], ":")
 
-    %{status: 200, body: %{"data" => product}} = Polar.get_product(polar_client, product_key)
-    %{status: 200, body: %{"data" => version}} = Polar.get_version(polar_client, product, serial)
+    %{status: 200, body: %{"data" => product}} = @polar.get_product(polar_client, product_key)
+    %{status: 200, body: %{"data" => version}} = @polar.get_version(polar_client, product, serial)
 
-    clusters = Polar.get_testing_clusters(polar_client)
-    polar_checks = Polar.get_testing_checks(polar_client)
+    clusters = @polar.get_testing_clusters(polar_client)
+    polar_checks = @polar.get_testing_checks(polar_client)
 
     checks =
       Enum.filter(checks, fn c ->
@@ -64,6 +59,7 @@ defmodule Icepak.Checks do
     |> Enum.filter(fn i -> i.is_metadata end)
     |> Enum.flat_map(
       &handle_metadata(&1, %{
+        arch: arch,
         checks: checks,
         polar_checks: polar_checks,
         product: product,
@@ -95,7 +91,7 @@ defmodule Icepak.Checks do
         })
       )
     else
-      raise "No cluster found for arch: #{state.arch} and type: #{type}"
+      []
     end
   end
 
@@ -107,6 +103,8 @@ defmodule Icepak.Checks do
         pc.name == check
       end)
 
-    module.perform(%{state | check: polar_check})
+    state = Map.put(state, :check, polar_check)
+
+    module.perform(state)
   end
 end
