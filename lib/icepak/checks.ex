@@ -47,6 +47,9 @@ defmodule Icepak.Checks do
     %{status: 200, body: %{"data" => product}} = @polar.get_product(polar_client, product_key)
     %{status: 200, body: %{"data" => version}} = @polar.get_version(polar_client, product, serial)
 
+    %{status: 201, body: %{"data" => _event}} =
+      @polar.transition_version(polar_client, version, %{"name" => "test"})
+
     clusters = @polar.get_testing_clusters(polar_client)
     polar_checks = @polar.get_testing_checks(polar_client)
 
@@ -55,19 +58,31 @@ defmodule Icepak.Checks do
         c in Enum.map(polar_checks, fn pc -> pc.name end)
       end)
 
-    items
-    |> Enum.filter(fn i -> i.is_metadata end)
-    |> Enum.flat_map(
-      &handle_metadata(&1, %{
-        arch: arch,
-        checks: checks,
-        polar_checks: polar_checks,
-        product: product,
-        version: version,
-        polar_client: polar_client,
-        clusters: clusters
-      })
-    )
+    assessment_events =
+      items
+      |> Enum.filter(fn i -> i.is_metadata end)
+      |> Enum.flat_map(
+        &handle_metadata(&1, %{
+          arch: arch,
+          checks: checks,
+          polar_checks: polar_checks,
+          product: product,
+          version: version,
+          polar_client: polar_client,
+          clusters: clusters
+        })
+      )
+
+    passes =
+      Enum.map(assessment_events, fn {:ok, event} ->
+        event["name"] == "pass"
+      end)
+
+    if Enum.count(passes) == Enum.count(assessment_events) do
+      @polar.transition_version(polar_client, version, %{"name" => "activate"})
+    else
+      @polar.transition_version(polar_client, version, %{"name" => "deactivate"})
+    end
   end
 
   defp handle_metadata(metadata, state) do

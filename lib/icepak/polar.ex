@@ -15,6 +15,12 @@ defmodule Icepak.Polar do
     Req.get!(client, url: "/publish/products/#{product_id}/versions/#{serial}")
   end
 
+  def transition_version(client, version, params) do
+    version_id = version["id"]
+
+    Req.post!(client, url: "/publish/versions/#{version_id}/events", json: %{event: params})
+  end
+
   def create_version(client, product_id, version_params) do
     Req.post!(client,
       url: "/publish/products/#{product_id}/versions",

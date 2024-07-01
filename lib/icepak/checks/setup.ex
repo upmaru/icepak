@@ -1,9 +1,6 @@
 defmodule Icepak.Checks.Setup do
   alias Icepak.Testing
 
-  @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
-  @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
-
   defmacro __using__(_) do
     quote do
       import Icepak.Checks.Setup
@@ -37,6 +34,9 @@ defmodule Icepak.Checks.Setup do
       end
     end
   end
+
+  @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
+  @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
   def prepare(
         check_name,

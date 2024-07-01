@@ -12,4 +12,6 @@ defmodule Icepak.Polar.Behaviour do
   @callback get_or_create_testing_assessment(%Req.Request{}, map, map) :: map()
 
   @callback transition_testing_assessment(%Req.Request{}, map, map) :: map()
+
+  @callback transition_version(%Req.Request{}, map, map) :: map()
 end

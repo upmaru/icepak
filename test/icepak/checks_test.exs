@@ -52,6 +52,13 @@ defmodule Icepak.ChecksTest do
       end)
 
       Icepak.PolarMock
+      |> expect(:transition_version, fn _client, _version, event ->
+        assert event["name"] == "test"
+
+        %{status: 201, body: %{"data" => %{"id" => 1, "name" => "test"}}}
+      end)
+
+      Icepak.PolarMock
       |> expect(:get_testing_clusters, fn _client ->
         [
           %Cluster{
@@ -136,7 +143,14 @@ defmodule Icepak.ChecksTest do
         {:ok, %{body: %{"id" => "some-uuid"}}}
       end)
 
-      assert results =
+      Icepak.PolarMock
+      |> expect(:transition_version, fn _client, _version, event ->
+        assert event["name"] == "activate"
+
+        %{status: 201, body: %{"data" => %{"id" => 1, "name" => "activate"}}}
+      end)
+
+      assert %{status: 201, body: %{"data" => event}} =
                Icepak.Checks.perform(
                  os: os,
                  checks: checks,
@@ -147,7 +161,7 @@ defmodule Icepak.ChecksTest do
                  path: path
                )
 
-      assert Enum.count(results) == 1
+      assert event["name"] == "activate"
     end
   end
 end
