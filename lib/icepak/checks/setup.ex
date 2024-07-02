@@ -5,6 +5,8 @@ defmodule Icepak.Checks.Setup do
     quote do
       import Icepak.Checks.Setup
 
+      alias Icepak.Checks.Setup.CheckFailError
+
       @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
       @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
@@ -28,11 +30,15 @@ defmodule Icepak.Checks.Setup do
           __MODULE__,
           :handle_assessment,
           [options],
-          timeout: 30_000
+          timeout: 60_000
         )
         |> Enum.to_list()
       end
     end
+  end
+
+  defmodule CheckFailError do
+    defexception [:message]
   end
 
   @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
@@ -86,12 +92,13 @@ defmodule Icepak.Checks.Setup do
         :timer.sleep(2_000)
       end
 
-      %{
-        client: client,
-        assessment: assessment,
-        project_name: project_name,
-        instance_name: instance_name
-      }
+      {:ok,
+       %{
+         client: client,
+         assessment: assessment,
+         project_name: project_name,
+         instance_name: instance_name
+       }}
     end
   end
 
