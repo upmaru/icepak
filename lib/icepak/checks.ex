@@ -72,6 +72,7 @@ defmodule Icepak.Checks do
           clusters: clusters
         })
       )
+      |> Enum.reject(fn {:ok, value} -> value == :skip end)
 
     passes =
       Enum.map(assessment_events, fn {:ok, %{body: %{"data" => event}}} ->

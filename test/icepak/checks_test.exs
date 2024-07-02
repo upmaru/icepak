@@ -91,7 +91,7 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:get_or_create_testing_assessment, fn _client, _version, _params ->
-        %Req.Response{status: 200, body: %{"data" => %{"id" => 1}}}
+        %Req.Response{status: 200, body: %{"data" => %{"id" => 1, "current_state" => "created"}}}
       end)
 
       Icepak.LexdeeMock

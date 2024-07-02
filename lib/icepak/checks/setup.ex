@@ -72,44 +72,49 @@ defmodule Icepak.Checks.Setup do
         requirements: requirements
       })
 
-    %{status: 200, body: %{"data" => assessment}} =
-      @polar.get_or_create_testing_assessment(polar_client, version, %{
-        check_id: check.id,
-        cluster_id: cluster.id,
-        instance_type: Map.fetch!(@instance_type_mappings, instance_params["type"])
-      })
+    polar_client
+    |> @polar.get_or_create_testing_assessment(version, %{
+      check_id: check.id,
+      cluster_id: cluster.id,
+      instance_type: Map.fetch!(@instance_type_mappings, instance_params["type"])
+    })
+    |> case do
+      %{status: 200, body: %{"data" => %{"current_state" => "passed"}}} ->
+        {:ok, :skip}
 
-    %{status: 201, body: %{"data" => _event}} =
-      @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
+      %{status: 200, body: %{"data" => %{"current_state" => _} = assessment}} ->
+        %{status: 201, body: %{"data" => _event}} =
+          @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
 
-    client =
-      Lexdee.create_client(
-        params.cluster.endpoint,
-        params.cluster.certificate,
-        params.cluster.private_key,
-        timeout: 300_000
-      )
+        client =
+          Lexdee.create_client(
+            params.cluster.endpoint,
+            params.cluster.certificate,
+            params.cluster.private_key,
+            timeout: 300_000
+          )
 
-    with {:ok, project_name} <- Testing.get_or_create_project(client),
-         {:ok, %{body: create_operation}} <-
-           @lexdee.create_instance(client, instance_params, query: [project: project_name]),
-         {:ok, _wait_create_result} <-
-           @lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 300]),
-         {:ok, %{body: start_operation}} <-
-           @lexdee.start_instance(client, instance_name, query: [project: project_name]),
-         {:ok, _wait_start_result} <-
-           @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
-      if Application.get_env(:icepak, :env) != :test do
-        :timer.sleep(2_000)
-      end
+        with {:ok, project_name} <- Testing.get_or_create_project(client),
+             {:ok, %{body: create_operation}} <-
+               @lexdee.create_instance(client, instance_params, query: [project: project_name]),
+             {:ok, _wait_create_result} <-
+               @lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 300]),
+             {:ok, %{body: start_operation}} <-
+               @lexdee.start_instance(client, instance_name, query: [project: project_name]),
+             {:ok, _wait_start_result} <-
+               @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
+          if Application.get_env(:icepak, :env) != :test do
+            :timer.sleep(2_000)
+          end
 
-      {:ok,
-       %{
-         client: client,
-         assessment: assessment,
-         project_name: project_name,
-         instance_name: instance_name
-       }}
+          {:ok,
+           %{
+             client: client,
+             assessment: assessment,
+             project_name: project_name,
+             instance_name: instance_name
+           }}
+        end
     end
   end
 

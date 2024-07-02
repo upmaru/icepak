@@ -43,6 +43,9 @@ defmodule Icepak.Checks.IPv6 do
         @polar.transition_testing_assessment(polar_client, assessment, %{name: "fail"})
       end
     else
+      {:ok, :skip} ->
+        {:ok, :skip}
+
       {:error, %{"error" => error}} ->
         raise CheckFailError, error
     end
