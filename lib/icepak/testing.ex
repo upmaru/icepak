@@ -40,7 +40,7 @@ defmodule Icepak.Testing do
         "fingerprint" => attrs.fingerprint
       }
     }
-    |> handle_requirements(attrs.requirements)
+    |> handle_requirements(attrs.requirements, type)
   end
 
   def get_or_create_project(client) do
@@ -66,7 +66,9 @@ defmodule Icepak.Testing do
     "secureboot" => "security.secureboot"
   }
 
-  defp handle_requirements(params, requirements) do
+  defp handle_requirements(params, _requirements, "container"), do: params
+
+  defp handle_requirements(params, requirements, "virtual-machine") do
     config =
       Enum.reduce(requirements, %{}, fn {key, val}, acc ->
         if config_key = Map.get(@config_keys, key) do
