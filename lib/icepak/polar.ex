@@ -88,13 +88,13 @@ defmodule Icepak.Polar do
     client = client()
 
     client
-    |> Req.update(url: "/publish/sessions", json: body)
+    |> Req.merge(url: "/publish/sessions", json: body)
     |> Req.post()
     |> case do
       {:ok, %{body: %{"data" => %{"token" => session_token}}}} ->
         Logger.info("[Polar] Authenticated")
 
-        Req.update(client, headers: [{"authorization", session_token}])
+        Req.merge(client, headers: [{"authorization", session_token}])
 
       _ ->
         raise "Failed to authenticate with Polar"
