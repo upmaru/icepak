@@ -34,7 +34,8 @@ defmodule Icepak.Checks.Setup do
           __MODULE__,
           :handle_assessment,
           [options],
-          timeout: 300_000
+          timeout: 300_000,
+          max_concurrency: 1
         )
         |> Enum.to_list()
       end
