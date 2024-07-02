@@ -1,4 +1,5 @@
 defmodule Icepak.Polar.Cluster do
+  @derive {Inspect, only: [:id, :type, :arch, :current_state]}
   defstruct [:id, :type, :arch, :current_state, :endpoint, :private_key, :certificate]
 
   def new(%{

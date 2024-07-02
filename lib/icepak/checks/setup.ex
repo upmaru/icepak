@@ -126,7 +126,7 @@ defmodule Icepak.Checks.Setup do
             wait_time = Map.fetch!(@wait_time, instance_type)
 
             Logger.info(
-              "[#{check_name}] Waiting #{wait_time} seconds for #{instance_type} #{instance_name}"
+              "[#{check_name}] Waiting #{wait_time} ms for #{instance_type} #{instance_name}"
             )
 
             :timer.sleep(wait_time)
@@ -137,7 +137,8 @@ defmodule Icepak.Checks.Setup do
              client: client,
              assessment: assessment,
              project_name: project_name,
-             instance_name: instance_name
+             instance_name: instance_name,
+             instance_type: instance_type
            }}
         end
     end
