@@ -44,6 +44,11 @@ defmodule Icepak.Checks.Setup do
   @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
   @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
+  @instance_type_mappings %{
+    "container" => "container",
+    "virtual-machine" => "vm"
+  }
+
   def prepare(
         check_name,
         %{polar_client: polar_client, version: version, check: check, cluster: cluster} = params
@@ -66,7 +71,7 @@ defmodule Icepak.Checks.Setup do
       @polar.get_or_create_testing_assessment(polar_client, version, %{
         check_id: check.id,
         cluster_id: cluster.id,
-        instance_type: instance_params["type"]
+        instance_type: Map.fetch!(@instance_type_mappings, instance_params["type"])
       })
 
     %{status: 201, body: %{"data" => _event}} =
