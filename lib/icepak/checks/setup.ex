@@ -15,13 +15,15 @@ defmodule Icepak.Checks.Setup do
             check: polar_check,
             polar_client: polar_client,
             metadata: metadata,
-            version: version
+            version: version,
+            product: product
           }) do
         options = [
           cluster: cluster,
           version: version,
           check: polar_check,
-          polar_client: polar_client
+          polar_client: polar_client,
+          product: product
         ]
 
         Task.Supervisor.async_stream(
@@ -57,6 +59,8 @@ defmodule Icepak.Checks.Setup do
       Uniq.UUID.uuid7()
       |> ShortUUID.encode()
 
+    requirements = Map.get(params.product, "requirements", %{})
+
     instance_name = Enum.join([check_name, uuid], "-")
 
     instance_params =
@@ -64,7 +68,8 @@ defmodule Icepak.Checks.Setup do
         type: params.hash_item.name,
         arch: params.cluster.arch,
         name: instance_name,
-        fingerprint: params.hash_item.hash
+        fingerprint: params.hash_item.hash,
+        requirements: requirements
       })
 
     %{status: 200, body: %{"data" => assessment}} =

@@ -74,7 +74,7 @@ defmodule Icepak.Checks do
       )
 
     passes =
-      Enum.map(assessment_events, fn {:ok, event} ->
+      Enum.map(assessment_events, fn {:ok, %{body: %{"data" => event}}} ->
         event["name"] == "pass"
       end)
 

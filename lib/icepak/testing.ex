@@ -16,10 +16,6 @@ defmodule Icepak.Testing do
   }
 
   @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
-  # @architecture_mappings %{
-  #   "amd64" => "x86_64",
-  #   "arm64" => "aarch64"
-  # }
 
   def project, do: @project_params
 
@@ -44,6 +40,7 @@ defmodule Icepak.Testing do
         "fingerprint" => attrs.fingerprint
       }
     }
+    |> handle_requirements(attrs.requirements)
   end
 
   def get_or_create_project(client) do
@@ -63,5 +60,22 @@ defmodule Icepak.Testing do
       {:error, _} ->
         {:error, :could_not_get_or_create_project}
     end
+  end
+
+  @config_keys %{
+    "secureboot" => "security.secureboot"
+  }
+
+  defp handle_requirements(params, requirements) do
+    config =
+      Enum.reduce(requirements, %{}, fn {key, val}, acc ->
+        if config_key = Map.get(@config_keys, key) do
+          Map.put(acc, config_key, val)
+        else
+          acc
+        end
+      end)
+
+    Map.put(params, "config", config)
   end
 end

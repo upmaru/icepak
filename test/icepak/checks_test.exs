@@ -43,7 +43,16 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:get_product, fn _client, _product_key ->
-        %{status: 200, body: %{"data" => [%{"id" => 1, "key" => "some-key"}]}}
+        %{
+          status: 200,
+          body: %{
+            "data" => %{
+              "id" => 1,
+              "key" => "some-key",
+              "requirements" => %{"secureboot" => "false"}
+            }
+          }
+        }
       end)
 
       Icepak.PolarMock
@@ -82,7 +91,7 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:get_or_create_testing_assessment, fn _client, _version, _params ->
-        %{status: 200, body: %{"data" => %{"id" => 1}}}
+        %Req.Response{status: 200, body: %{"data" => %{"id" => 1}}}
       end)
 
       Icepak.LexdeeMock
@@ -130,7 +139,7 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:transition_testing_assessment, 2, fn _client, _assessment, params ->
-        %{status: 201, body: %{"data" => %{"id" => 1, "name" => params.name}}}
+        %Req.Response{status: 201, body: %{"data" => %{"id" => 1, "name" => params.name}}}
       end)
 
       Icepak.LexdeeMock
@@ -147,7 +156,7 @@ defmodule Icepak.ChecksTest do
       |> expect(:transition_version, fn _client, _version, event ->
         assert event["name"] == "activate"
 
-        %{status: 201, body: %{"data" => %{"id" => 1, "name" => "activate"}}}
+        %Req.Response{status: 201, body: %{"data" => %{"id" => 1, "name" => "activate"}}}
       end)
 
       assert %{status: 201, body: %{"data" => event}} =

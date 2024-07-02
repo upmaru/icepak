@@ -10,6 +10,7 @@ defmodule Icepak.Checks.IPv6 do
     polar_client = Keyword.fetch!(options, :polar_client)
     version = Keyword.fetch!(options, :version)
     check = Keyword.fetch!(options, :check)
+    product = Keyword.fetch!(options, :product)
 
     with {:ok,
           %{
@@ -22,6 +23,7 @@ defmodule Icepak.Checks.IPv6 do
              polar_client: polar_client,
              version: version,
              hash_item: hash_item,
+             product: product,
              cluster: cluster,
              check: check
            }) do
