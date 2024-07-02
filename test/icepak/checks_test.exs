@@ -57,7 +57,7 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:get_version, fn _client, _product, _serial ->
-        %{status: 200, body: %{"data" => %{"id" => 1}}}
+        %{status: 200, body: %{"data" => %{"id" => 1, "serial" => "blah"}}}
       end)
 
       Icepak.PolarMock
@@ -201,7 +201,7 @@ defmodule Icepak.ChecksTest do
 
       Icepak.PolarMock
       |> expect(:get_version, fn _client, _product, _serial ->
-        %{status: 200, body: %{"data" => %{"id" => 1}}}
+        %{status: 200, body: %{"data" => %{"id" => 1, "serial" => "blah"}}}
       end)
 
       Icepak.PolarMock

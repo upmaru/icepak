@@ -38,8 +38,12 @@ defmodule Icepak.Checks.IPv4 do
       teardown(environment)
 
       if not is_nil(inet) do
+        Logger.info("[#{@check_name}] Passed for #{instance_name}")
+
         @polar.transition_testing_assessment(polar_client, assessment, %{name: "pass"})
       else
+        Logger.info("[#{@check_name}] Failed for #{instance_name}")
+
         @polar.transition_testing_assessment(polar_client, assessment, %{name: "fail"})
       end
     else

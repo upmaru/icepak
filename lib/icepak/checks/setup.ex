@@ -10,6 +10,8 @@ defmodule Icepak.Checks.Setup do
       @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
       @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
+      require Logger
+
       def perform(%{
             cluster: cluster,
             check: polar_check,
@@ -51,6 +53,13 @@ defmodule Icepak.Checks.Setup do
     "virtual-machine" => "vm"
   }
 
+  @wait_time %{
+    "container" => 2_000,
+    "vm" => 10_000
+  }
+
+  require Logger
+
   def prepare(
         check_name,
         %{polar_client: polar_client, version: version, check: check, cluster: cluster} = params
@@ -72,17 +81,27 @@ defmodule Icepak.Checks.Setup do
         requirements: requirements
       })
 
+    instance_type = Map.fetch!(@instance_type_mappings, instance_params["type"])
+
     polar_client
     |> @polar.get_or_create_testing_assessment(version, %{
       check_id: check.id,
       cluster_id: cluster.id,
-      instance_type: Map.fetch!(@instance_type_mappings, instance_params["type"])
+      instance_type: instance_type
     })
     |> case do
       %{status: 200, body: %{"data" => %{"current_state" => "passed"}}} ->
+        Logger.info(
+          "[#{check_name}] Skipping assessment #{instance_type} for #{version["serial"]} #{instance_name}"
+        )
+
         {:ok, :skip}
 
       %{status: 200, body: %{"data" => %{"current_state" => _} = assessment}} ->
+        Logger.info(
+          "[#{check_name}] Running assessment #{instance_type} for #{version["serial"]} #{instance_name}"
+        )
+
         %{status: 201, body: %{"data" => _event}} =
           @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
 
@@ -104,7 +123,13 @@ defmodule Icepak.Checks.Setup do
              {:ok, _wait_start_result} <-
                @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
           if Application.get_env(:icepak, :env) != :test do
-            :timer.sleep(2_000)
+            wait_time = Map.fetch!(@wait_time, instance_type)
+
+            Logger.info(
+              "[#{check_name}] Waiting #{wait_time} seconds for #{instance_type} #{instance_name}"
+            )
+
+            :timer.sleep(wait_time)
           end
 
           {:ok,
@@ -122,7 +147,7 @@ defmodule Icepak.Checks.Setup do
     with {:ok, %{body: stop_operation}} <-
            @lexdee.stop_instance(client, instance_name, query: [project: project_name]),
          {:ok, _} <-
-           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 120]) do
+           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 300]) do
       :ok
     end
   end
