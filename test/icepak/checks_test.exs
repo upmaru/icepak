@@ -29,7 +29,7 @@ defmodule Icepak.ChecksTest do
   end
 
   describe "perform" do
-    test "can run checks", %{
+    test "can run checks and activate version", %{
       os: os,
       checks: checks,
       release: release,
