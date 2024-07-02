@@ -44,7 +44,7 @@ defmodule Icepak.Checks.IPv4 do
       end
     else
       {:ok, :skip} ->
-        {:ok, :skip}
+        :skip
 
       {:error, %{"error" => error}} ->
         raise CheckFailError, error
