@@ -13,7 +13,8 @@ defmodule Icepak.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      {Finch, finch_options(Application.get_env(:icepak, :env))}
+      {Finch, finch_options(Application.get_env(:icepak, :env))},
+      {Task.Supervisor, name: Icepak.TaskSupervisor}
       # Starts a worker by calling: Icepak.Worker.start_link(arg)
       # {Icepak.Worker, arg}
     ]
