@@ -30,7 +30,7 @@ defmodule Icepak.Checks.Setup do
           __MODULE__,
           :handle_assessment,
           [options],
-          timeout: 60_000
+          timeout: 300_000
         )
         |> Enum.to_list()
       end
@@ -81,18 +81,19 @@ defmodule Icepak.Checks.Setup do
       Lexdee.create_client(
         params.cluster.endpoint,
         params.cluster.certificate,
-        params.cluster.private_key
+        params.cluster.private_key,
+        timeout: 300_000
       )
 
     with {:ok, project_name} <- Testing.get_or_create_project(client),
          {:ok, %{body: create_operation}} <-
            @lexdee.create_instance(client, instance_params, query: [project: project_name]),
          {:ok, _wait_create_result} <-
-           @lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 120]),
+           @lexdee.wait_for_operation(client, create_operation["id"], query: [timeout: 300]),
          {:ok, %{body: start_operation}} <-
            @lexdee.start_instance(client, instance_name, query: [project: project_name]),
          {:ok, _wait_start_result} <-
-           @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 120]) do
+           @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
       if Application.get_env(:icepak, :env) != :test do
         :timer.sleep(2_000)
       end
