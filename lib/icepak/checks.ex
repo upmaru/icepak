@@ -8,6 +8,8 @@ defmodule Icepak.Checks do
 
   @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
+  require Logger
+
   def perform(options) do
     base_path =
       options
@@ -80,8 +82,14 @@ defmodule Icepak.Checks do
       end)
 
     if Enum.count(passes) == Enum.count(assessment_events) do
+      Logger.info("[Checks] ✅ Activating #{product["id"]} #{version["serial"]} all checks passed")
+
       @polar.transition_version(polar_client, version, %{"name" => "activate"})
     else
+      Logger.info(
+        "[Checks] ❌ Deactivating #{product["id"]} #{version["serial"]} some checks failed"
+      )
+
       @polar.transition_version(polar_client, version, %{"name" => "deactivate"})
     end
   end

@@ -138,17 +138,27 @@ defmodule Icepak.Checks.Setup do
              assessment: assessment,
              project_name: project_name,
              instance_name: instance_name,
-             instance_type: instance_type
+             instance_type: instance_type,
+             fingerprint: params.hash_item.hash
            }}
         end
     end
   end
 
-  def teardown(%{client: client, instance_name: instance_name, project_name: project_name}) do
+  def teardown(%{
+        client: client,
+        instance_name: instance_name,
+        project_name: project_name,
+        fingerprint: fingerprint
+      }) do
     with {:ok, %{body: stop_operation}} <-
            @lexdee.stop_instance(client, instance_name, query: [project: project_name]),
          {:ok, _} <-
-           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 300]) do
+           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 300]),
+         {:ok, %{body: delete_image}} <-
+           @lexdee.delete_image(client, fingerprint, query: [project: project_name]),
+         {:ok, _} <-
+           @lexdee.wait_for_operation(client, delete_image["id"], query: [timeout: 300]) do
       :ok
     end
   end

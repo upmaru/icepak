@@ -152,6 +152,16 @@ defmodule Icepak.ChecksTest do
         {:ok, %{body: %{"id" => "some-uuid"}}}
       end)
 
+      Icepak.LexdeeMock
+      |> expect(:delete_image, fn _client, _params, _options ->
+        {:ok, %{body: %{"id" => "delete-image-uuid"}}}
+      end)
+
+      Icepak.LexdeeMock
+      |> expect(:wait_for_operation, fn _client, _params, _options ->
+        {:ok, %{body: %{"id" => "delete-image-uuid"}}}
+      end)
+
       Icepak.PolarMock
       |> expect(:transition_version, fn _client, _version, event ->
         assert event["name"] == "activate"
