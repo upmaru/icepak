@@ -37,6 +37,7 @@ defmodule Icepak.Testing do
         "mode" => "pull",
         "protocol" => "simplestreams",
         "server" => image_server(),
+        "refresh" => true,
         "fingerprint" => attrs.fingerprint
       }
     }
