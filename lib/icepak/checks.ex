@@ -92,6 +92,9 @@ defmodule Icepak.Checks do
       )
 
       @polar.transition_version(polar_client, version, %{"name" => "deactivate"})
+
+      raise Icepak.Checks.Setup.CheckFailError,
+            "Some checks have failed, please retry or fix the issue."
     end
   end
 
