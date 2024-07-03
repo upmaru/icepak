@@ -18,7 +18,7 @@ defmodule Icepak.Checks.IPv6 do
             assessment: assessment,
             project_name: project_name,
             instance_name: instance_name,
-            instance_typ: instance_type
+            instance_type: instance_type
           } = environment} <-
            prepare(@check_name, %{
              polar_client: polar_client,
