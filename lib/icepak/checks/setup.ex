@@ -135,6 +135,7 @@ defmodule Icepak.Checks.Setup do
           {:ok,
            %{
              client: client,
+             check_name: check_name,
              assessment: assessment,
              project_name: project_name,
              instance_name: instance_name,
@@ -147,10 +148,13 @@ defmodule Icepak.Checks.Setup do
 
   def teardown(%{
         client: client,
+        check_name: check_name,
         instance_name: instance_name,
         project_name: project_name,
         fingerprint: fingerprint
       }) do
+    Logger.info("[#{check_name}] Deleting instance #{instance_name} and image #{fingerprint}")
+
     with {:ok, %{body: stop_operation}} <-
            @lexdee.stop_instance(client, instance_name, query: [project: project_name]),
          {:ok, _} <-
