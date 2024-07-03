@@ -54,7 +54,7 @@ defmodule Icepak.Checks.Setup do
   }
 
   @wait_time %{
-    "container" => 2_000,
+    "container" => 8_000,
     "vm" => 30_000
   }
 
