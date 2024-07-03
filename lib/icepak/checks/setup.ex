@@ -54,7 +54,7 @@ defmodule Icepak.Checks.Setup do
   }
 
   @wait_time %{
-    "container" => 2_000,
+    "container" => 6_000,
     "vm" => 10_000
   }
 
@@ -150,19 +150,14 @@ defmodule Icepak.Checks.Setup do
         client: client,
         check_name: check_name,
         instance_name: instance_name,
-        project_name: project_name,
-        fingerprint: fingerprint
+        project_name: project_name
       }) do
-    Logger.info("[#{check_name}] Deleting instance #{instance_name} and image #{fingerprint}")
+    Logger.info("[#{check_name}] Deleting instance #{instance_name}")
 
     with {:ok, %{body: stop_operation}} <-
            @lexdee.stop_instance(client, instance_name, query: [project: project_name]),
          {:ok, _} <-
-           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 300]),
-         {:ok, %{body: delete_image}} <-
-           @lexdee.delete_image(client, fingerprint, query: [project: project_name]),
-         {:ok, _} <-
-           @lexdee.wait_for_operation(client, delete_image["id"], query: [timeout: 300]) do
+           @lexdee.wait_for_operation(client, stop_operation["id"], query: [timeout: 300]) do
       :ok
     end
   end

@@ -255,6 +255,16 @@ defmodule Icepak.ChecksTest do
         %Req.Response{status: 201, body: %{"data" => %{"id" => 1, "name" => "activate"}}}
       end)
 
+      Icepak.LexdeeMock
+      |> expect(:delete_image, fn _client, _params, _options ->
+        {:ok, %{body: %{"id" => "delete-image-uuid"}}}
+      end)
+
+      Icepak.LexdeeMock
+      |> expect(:wait_for_operation, fn _client, _params, _options ->
+        {:ok, %{body: %{"id" => "delete-image-uuid"}}}
+      end)
+
       assert %{status: 201, body: %{"data" => _event}} =
                Icepak.Checks.perform(
                  os: os,

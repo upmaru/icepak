@@ -6,6 +6,7 @@ defmodule Icepak.Checks do
     "ipv6" => Icepak.Checks.IPv6
   }
 
+  @lexdee Application.compile_env(:icepak, :lexdee) || Lexdee
   @polar Application.compile_env(:icepak, :polar) || Icepak.Polar
 
   require Logger
@@ -103,17 +104,30 @@ defmodule Icepak.Checks do
       end)
 
     if cluster do
-      Enum.flat_map(
-        state.checks,
-        &handle_check(&1, %{
-          metadata: metadata,
-          polar_client: state.polar_client,
-          polar_checks: state.polar_checks,
-          product: state.product,
-          version: state.version,
-          cluster: cluster
-        })
-      )
+      results =
+        Enum.flat_map(
+          state.checks,
+          &handle_check(&1, %{
+            metadata: metadata,
+            polar_client: state.polar_client,
+            polar_checks: state.polar_checks,
+            product: state.product,
+            version: state.version,
+            cluster: cluster
+          })
+        )
+
+      client =
+        Lexdee.create_client(
+          cluster.endpoint,
+          cluster.certificate,
+          cluster.private_key,
+          timeout: 300_000
+        )
+
+      Enum.map(metadata.combined_hashes, &handle_cleanup(&1, client))
+
+      results
     else
       []
     end
@@ -130,5 +144,16 @@ defmodule Icepak.Checks do
     state = Map.put(state, :check, polar_check)
 
     module.perform(state)
+  end
+
+  defp handle_cleanup(hash_item, client) do
+    Logger.info("[Checks] Deleting image #{hash_item.hash}")
+
+    with {:ok, %{body: delete_image}} <-
+           @lexdee.delete_image(client, hash_item.hash, query: [project: "icepak-test"]),
+         {:ok, _} <-
+           @lexdee.wait_for_operation(client, delete_image["id"], query: [timeout: 300]) do
+      :ok
+    end
   end
 end
