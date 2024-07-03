@@ -45,7 +45,9 @@ defmodule Icepak.Push do
 
     with %{status: 200, body: %{"data" => %{"id" => product_id, "key" => key}}} <-
            Polar.get_product(polar_client, product_key),
-         %{status: 201} <- Polar.create_version(polar_client, product_id, version_params) do
+         %{status: 201, body: %{"data" => version}} <-
+           Polar.create_version(polar_client, product_id, version_params),
+         %{status: 201} <- Polar.transition_version(polar_client, version, %{"name" => "test"}) do
       Logger.info("[Push] Sucessfully pushed version #{serial} for #{key}")
     else
       %{status: 404} ->
