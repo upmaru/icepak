@@ -55,8 +55,8 @@ defmodule Icepak.Checks.Setup do
   }
 
   @wait_time %{
-    "container" => 5_000,
-    "vm" => 30_000
+    "container" => 2_000,
+    "vm" => 10_000
   }
 
   require Logger
@@ -106,6 +106,8 @@ defmodule Icepak.Checks.Setup do
         %{status: 201, body: %{"data" => _event}} =
           @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
 
+        :timer.sleep(1000)
+
         client =
           Lexdee.create_client(
             params.cluster.endpoint,
@@ -113,6 +115,8 @@ defmodule Icepak.Checks.Setup do
             params.cluster.private_key,
             timeout: 300_000
           )
+
+        run_attempt = System.get_env("GITHUB_RUN_ATTEMPT")
 
         with {:ok, project_name} <- Testing.get_or_create_project(client),
              {:ok, %{body: create_operation}} <-
@@ -124,7 +128,7 @@ defmodule Icepak.Checks.Setup do
              {:ok, _wait_start_result} <-
                @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
           if Application.get_env(:icepak, :env) != :test do
-            wait_time = Map.fetch!(@wait_time, instance_type)
+            wait_time = Map.fetch!(@wait_time, instance_type) * String.to_integer(run_attempt)
 
             Logger.info(
               "[#{check_name}] Waiting #{wait_time} ms for #{instance_type} #{instance_name}"
