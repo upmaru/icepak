@@ -1,9 +1,21 @@
 defmodule Icepak.CLI do
   @commands %{
-    "push" => :push
+    "push" => :push,
+    "validate" => :validate
   }
 
   @switches %{
+    validate: [
+      switches: [
+        path: :string,
+        serial: :string,
+        os: :string,
+        arch: :string,
+        release: :string,
+        variant: :string,
+        checks: :string
+      ]
+    ],
     push: [
       switches: [
         path: :string,
@@ -33,6 +45,7 @@ defmodule Icepak.CLI do
       Unknown command, please use one of the following:
 
       - push - will push the built image
+      - validate - will validate the image
       """)
     end
   end

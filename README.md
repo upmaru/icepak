@@ -4,6 +4,7 @@ Icepak github action will do the following:
 
 - Process metdata for all the built items
 - Interact with [polar](https://github.com/upmaru/polar) and publish images
+- Test images before publishing images
 
 ## Installation
 

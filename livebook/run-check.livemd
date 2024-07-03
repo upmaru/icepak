@@ -1,0 +1,48 @@
+# Run a check
+
+## Setup Metadata
+
+```elixir
+os = "alpine"
+release = "3.20"
+arch = "amd64"
+variant = "default"
+serial = "20240527-40"
+base_path = "test/support/fixtures/amd64"
+storage_path = Path.join(["images", os, release, arch, variant, serial])
+item_params = %{base_path: base_path, storage_path: storage_path}
+```
+
+```elixir
+items =
+  base_path
+  |> File.ls!()
+  |> Enum.filter(fn file_name ->
+    file_name in ["incus.tar.xz", "rootfs.squashfs", "disk.qcow2"]
+  end)
+  |> Enum.flat_map(&Icepak.Item.prepare(&1, item_params))
+```
+
+```elixir
+metadata = Enum.find(items, fn item -> item.name == "lxd.tar.xz" end)
+```
+
+## Get Cluster
+
+```elixir
+client = Icepak.Polar.authenticate()
+```
+
+```elixir
+[cluster] = Icepak.Polar.get_testing_clusters(client)
+```
+
+## Run Check
+
+```elixir
+alias Icepak.Checks.IPv4
+```
+
+```elixir
+task = IPv4.perform(%{cluster: cluster, metadata: metadata})
+```
