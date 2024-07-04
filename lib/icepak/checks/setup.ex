@@ -130,7 +130,7 @@ defmodule Icepak.Checks.Setup do
                @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
           if Application.get_env(:icepak, :env) != :test do
             instance_wait_time =
-              Enum.find(cluster["instance_wait_times"], fn iwt ->
+              Enum.find(cluster.instance_wait_times, fn iwt ->
                 iwt["type"] == instance_type
               end)
 
