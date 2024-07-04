@@ -117,7 +117,7 @@ defmodule Icepak.Checks.Setup do
           )
 
         run_attempt = System.get_env("GITHUB_RUN_ATTEMPT") || "0"
-        increment_wait_time = @increment_wait_time * String.to_integer(run_attempt)
+        increment_wait_time = @increment_wait_time * (String.to_integer(run_attempt) - 1)
 
         with {:ok, project_name} <- Testing.get_or_create_project(client),
              {:ok, %{body: create_operation}} <-
@@ -136,7 +136,7 @@ defmodule Icepak.Checks.Setup do
 
             wait_time =
               if instance_wait_time do
-                instance_wait_time["duration"]
+                instance_wait_time["duration"] + increment_wait_time
               else
                 Map.fetch!(@default_wait_time, instance_type) + increment_wait_time
               end
