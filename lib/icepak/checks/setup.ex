@@ -106,8 +106,6 @@ defmodule Icepak.Checks.Setup do
         %{status: 201, body: %{"data" => _event}} =
           @polar.transition_testing_assessment(polar_client, assessment, %{name: "run"})
 
-        :timer.sleep(1000)
-
         client =
           Lexdee.create_client(
             params.cluster.endpoint,
