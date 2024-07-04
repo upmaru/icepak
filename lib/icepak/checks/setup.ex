@@ -54,10 +54,12 @@ defmodule Icepak.Checks.Setup do
     "virtual-machine" => "vm"
   }
 
-  @wait_time %{
+  @default_wait_time %{
     "container" => 2_000,
     "vm" => 10_000
   }
+
+  @increment_wait_time 500
 
   require Logger
 
@@ -114,7 +116,8 @@ defmodule Icepak.Checks.Setup do
             timeout: 300_000
           )
 
-        run_attempt = System.get_env("GITHUB_RUN_ATTEMPT")
+        run_attempt = System.get_env("GITHUB_RUN_ATTEMPT") || "0"
+        increment_wait_time = @increment_wait_time * String.to_integer(run_attempt)
 
         with {:ok, project_name} <- Testing.get_or_create_project(client),
              {:ok, %{body: create_operation}} <-
@@ -126,7 +129,17 @@ defmodule Icepak.Checks.Setup do
              {:ok, _wait_start_result} <-
                @lexdee.wait_for_operation(client, start_operation["id"], query: [timeout: 300]) do
           if Application.get_env(:icepak, :env) != :test do
-            wait_time = Map.fetch!(@wait_time, instance_type) * String.to_integer(run_attempt)
+            instance_wait_time =
+              Enum.find(cluster.instance_wait_times, fn iwt ->
+                iwt["type"] == instance_type
+              end)
+
+            wait_time =
+              if instance_wait_time do
+                instance_wait_time["duration"]
+              else
+                Map.fetch!(@default_wait_time, instance_type) + increment_wait_time
+              end
 
             Logger.info(
               "[#{check_name}] Waiting #{wait_time} ms for #{instance_type} #{instance_name}"
