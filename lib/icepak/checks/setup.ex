@@ -59,7 +59,7 @@ defmodule Icepak.Checks.Setup do
     "vm" => 10_000
   }
 
-  @increment_wait_time 500
+  @increment_wait_time 2000
 
   require Logger
 
